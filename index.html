@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Game</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ── MODE SELECT ────────────────────────────────────── -->
+  <div id="mode-screen">
+    <h1>Card Game</h1>
+    <p class="subtitle">Race to empty your hand — but don't win a trick!</p>
+    <div class="mode-buttons">
+      <button id="mode-online-btn" class="mode-btn primary">
+        🌐 Play Online
+        <span class="mode-sub">Play with friends anywhere</span>
+      </button>
+      <button id="mode-local-btn" class="mode-btn">
+        🖥️ Play Locally
+        <span class="mode-sub">Same device or pass-and-play</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── LOBBY SCREEN ───────────────────────────────────── -->
+  <div id="lobby-screen">
+    <div id="lobby-form">
+      <button id="lobby-back-btn" class="back-btn">← Back</button>
+      <h2>Online Multiplayer</h2>
+
+      <div class="lobby-panels">
+        <!-- Create Room -->
+        <div class="lobby-panel">
+          <h3>Create Room</h3>
+          <label class="field-label">Your name</label>
+          <input type="text" id="create-name-input" placeholder="Your name" maxlength="16">
+
+          <label class="field-label">Total players</label>
+          <div class="count-buttons" id="create-player-count">
+            <button class="count-btn" data-count="2" onclick="document.querySelectorAll('#create-player-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">2</button>
+            <button class="count-btn" data-count="3" onclick="document.querySelectorAll('#create-player-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">3</button>
+            <button class="count-btn active" data-count="4" onclick="document.querySelectorAll('#create-player-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">4</button>
+            <button class="count-btn" data-count="5" onclick="document.querySelectorAll('#create-player-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">5</button>
+            <button class="count-btn" data-count="6" onclick="document.querySelectorAll('#create-player-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">6</button>
+          </div>
+
+          <label class="field-label">Human players (rest will be AI)</label>
+          <div class="count-buttons" id="create-human-count">
+            <button class="count-btn active" data-count="1" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">1</button>
+            <button class="count-btn" data-count="2" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">2</button>
+            <button class="count-btn" data-count="3" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">3</button>
+            <button class="count-btn" data-count="4" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">4</button>
+            <button class="count-btn" data-count="5" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">5</button>
+            <button class="count-btn" data-count="6" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">6</button>
+          </div>
+          <button id="create-room-btn" class="primary-btn">Create Room</button>
+        </div>
+
+        <div class="lobby-divider">or</div>
+
+        <!-- Join Room -->
+        <div class="lobby-panel">
+          <h3>Join Room</h3>
+          <label class="field-label">Your name</label>
+          <input type="text" id="join-name-input" placeholder="Your name" maxlength="16">
+
+          <label class="field-label">Room code</label>
+          <input type="text" id="join-code-input" placeholder="ABCD" maxlength="4" style="text-transform:uppercase;letter-spacing:4px;font-size:1.3rem;text-align:center">
+          <button id="join-room-btn" class="primary-btn">Join Room</button>
+        </div>
+      </div>
+
+      <p id="lobby-error" class="lobby-error"></p>
+    </div>
+
+    <!-- Waiting room (shown after create/join) -->
+    <div id="waiting-room" style="display:none">
+      <h2>Room <span id="room-code-display" class="room-code">????</span></h2>
+      <p class="subtitle">Share this code with your friends!</p>
+      <ul id="seat-list"></ul>
+      <button id="lobby-start-btn" class="primary-btn" style="display:none" disabled>Waiting for players…</button>
+      <p class="waiting-hint">Empty seats will be filled by AI when the game starts.</p>
+    </div>
+  </div>
+
+  <!-- ── SETUP SCREEN ──────────────────────────────────── -->
+  <div id="setup-screen">
+    <h1>Card Game</h1>
+    <p class="subtitle">Race to empty your hand — but don't win a trick!</p>
+
+    <p class="section-label">Number of players</p>
+    <div class="count-buttons">
+      <button class="count-btn" data-count="2" onclick="UI._renderSetup(2)">2</button>
+      <button class="count-btn" data-count="3" onclick="UI._renderSetup(3)">3</button>
+      <button class="count-btn active" data-count="4" onclick="UI._renderSetup(4)">4</button>
+      <button class="count-btn" data-count="5" onclick="UI._renderSetup(5)">5</button>
+      <button class="count-btn" data-count="6" onclick="UI._renderSetup(6)">6</button>
+    </div>
+
+    <p class="section-label">Players</p>
+    <div id="player-rows"></div>
+
+    <button id="start-btn">Start Game</button>
+  </div>
+
+  <!-- ── COVER SCREEN ───────────────────────────────────── -->
+  <div id="cover-screen">
+    <h2>Pass the device</h2>
+    <p>Tap when ready to see your cards.</p>
+    <button id="cover-ready-btn">I'm ready — show my cards</button>
+  </div>
+
+  <!-- ── GAME SCREEN ────────────────────────────────────── -->
+  <div id="game-screen">
+    <button id="menu-btn" aria-label="Show players" onclick="document.body.classList.toggle('menu-open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div id="menu-backdrop" onclick="document.body.classList.remove('menu-open')"></div>
+
+    <div id="status-bar">
+      <span class="status-text">Starting…</span>
+    </div>
+
+    <div id="trick-area"></div>
+
+    <div id="scoreboard">
+      <h3>Players</h3>
+    </div>
+
+    <div id="history-area">
+      <h3>Last Trick</h3>
+      <div id="history-list"></div>
+    </div>
+
+    <div id="hand-area">
+      <h3>Your hand</h3>
+      <div id="cards-container"></div>
+    </div>
+  </div>
+
+  <!-- ── END SCREEN ─────────────────────────────────────── -->
+  <div id="end-screen">
+    <h2>Game Over!</h2>
+
+    <div class="end-section">
+      <h3>Winners (finished first)</h3>
+      <ul class="winner-list" id="winner-list"></ul>
+    </div>
+
+    <div class="end-section">
+      <h3>Loser (last one holding cards)</h3>
+      <div class="loser-name" id="loser-name"></div>
+    </div>
+
+    <button id="play-again-btn">Play Again</button>
+  </div>
+
+  <!-- Scripts in dependency order -->
+  <script src="js/card.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/game.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/lobby.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
