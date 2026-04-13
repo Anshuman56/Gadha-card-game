@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Game — Lobby</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div id="lobby-screen" class="active">
+    <div id="lobby-form">
+      <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+      <h2>Online Multiplayer</h2>
+
+      <div class="lobby-panels">
+        <!-- Create Room -->
+        <div class="lobby-panel">
+          <h3>Create Room</h3>
+          <label class="field-label">Your name</label>
+          <input type="text" id="create-name-input" placeholder="Your name" maxlength="16">
+
+          <label class="field-label">Total players</label>
+          <div class="count-buttons" id="create-player-count">
+            <button class="count-btn" data-count="2" onclick="document.querySelectorAll('#create-player-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">2</button>
+            <button class="count-btn" data-count="3" onclick="document.querySelectorAll('#create-player-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">3</button>
+            <button class="count-btn active" data-count="4" onclick="document.querySelectorAll('#create-player-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">4</button>
+            <button class="count-btn" data-count="5" onclick="document.querySelectorAll('#create-player-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">5</button>
+            <button class="count-btn" data-count="6" onclick="document.querySelectorAll('#create-player-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">6</button>
+          </div>
+
+          <label class="field-label">Human players (rest will be AI)</label>
+          <div class="count-buttons" id="create-human-count">
+            <button class="count-btn active" data-count="1" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">1</button>
+            <button class="count-btn" data-count="2" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">2</button>
+            <button class="count-btn" data-count="3" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">3</button>
+            <button class="count-btn" data-count="4" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">4</button>
+            <button class="count-btn" data-count="5" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">5</button>
+            <button class="count-btn" data-count="6" onclick="document.querySelectorAll('#create-human-count .count-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">6</button>
+          </div>
+          <button id="create-room-btn" class="primary-btn">Create Room</button>
+        </div>
+
+        <div class="lobby-divider">or</div>
+
+        <!-- Join Room -->
+        <div class="lobby-panel">
+          <h3>Join Room</h3>
+          <label class="field-label">Your name</label>
+          <input type="text" id="join-name-input" placeholder="Your name" maxlength="16">
+
+          <label class="field-label">Room code</label>
+          <input type="text" id="join-code-input" placeholder="ABCD" maxlength="4" style="text-transform:uppercase;letter-spacing:4px;font-size:1.3rem;text-align:center">
+          <button id="join-room-btn" class="primary-btn">Join Room</button>
+        </div>
+      </div>
+
+      <p id="lobby-error" class="lobby-error"></p>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/lobby.js"></script>
+</body>
+</html>

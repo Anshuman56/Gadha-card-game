@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Game — Room</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div id="lobby-screen" class="active">
+    <div id="waiting-room">
+      <button class="back-btn" onclick="window.location.href='/lobby'">← Back to Lobby</button>
+      <h2>Room <span id="room-code-display" class="room-code">????</span></h2>
+      <p class="subtitle">Share this code with your friends!</p>
+      <ul id="seat-list"></ul>
+      <button id="lobby-start-btn" class="primary-btn" style="display:none" disabled>Waiting for players…</button>
+      <p class="waiting-hint">Empty seats will be filled by AI when the game starts.</p>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/lobby.js"></script>
+</body>
+</html>

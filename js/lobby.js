@@ -5,22 +5,38 @@ const Lobby = {
   myToken: null,
 
   _initialized: false,
+  _isRoomPage: false,
 
   // ── Init ───────────────────────────────────────────────────────────────
   init() {
+    this._isRoomPage = !!document.getElementById('waiting-room') && !document.getElementById('lobby-form');
+
     if (!this._initialized) {
-      document.getElementById('create-room-btn').addEventListener('click', () => this.onCreateRoom());
-      document.getElementById('join-room-btn').addEventListener('click', () => this.onJoinRoom());
-      document.getElementById('lobby-start-btn').addEventListener('click', () => this.onStartGame());
-      document.getElementById('lobby-back-btn').addEventListener('click', () => UI._showScreen('mode-screen'));
-      document.getElementById('join-code-input').addEventListener('input', e => {
+      const createBtn = document.getElementById('create-room-btn');
+      const joinBtn = document.getElementById('join-room-btn');
+      const joinCodeInput = document.getElementById('join-code-input');
+      const startBtn = document.getElementById('lobby-start-btn');
+
+      if (createBtn) createBtn.addEventListener('click', () => this.onCreateRoom());
+      if (joinBtn) joinBtn.addEventListener('click', () => this.onJoinRoom());
+      if (joinCodeInput) joinCodeInput.addEventListener('input', e => {
         e.target.value = e.target.value.toUpperCase();
       });
+      if (startBtn) startBtn.addEventListener('click', () => this.onStartGame());
       this._initialized = true;
     }
 
-    // Check for saved session each time lobby is opened
-    this._tryReconnect();
+    if (this._isRoomPage) {
+      // On /room/:code page — get room code from URL and reconnect
+      const match = window.location.pathname.match(/^\/room\/([A-Z]{4})$/i);
+      if (match) {
+        this.roomCode = match[1].toUpperCase();
+        document.getElementById('room-code-display').textContent = this.roomCode;
+        this._tryReconnect();
+      } else {
+        window.location.href = '/lobby';
+      }
+    }
   },
 
   _connect() {
@@ -37,7 +53,8 @@ const Lobby = {
       this.mySeatIndex = data.seatIndex;
       this.myToken = data.token;
       this._saveSession(data.code, data.seatIndex, data.token);
-      this._renderWaitingRoom(data.roomState, true);
+      // Navigate to room page
+      window.location.href = '/room/' + data.code;
     });
 
     s.on('room-joined', data => {
@@ -47,7 +64,12 @@ const Lobby = {
         this.myToken = data.token;
         this._saveSession(this.roomCode, data.seatIndex, data.token);
       }
-      this._renderWaitingRoom(data.roomState, false);
+      if (this._isRoomPage) {
+        this._renderWaitingRoom(data.roomState, false);
+      } else {
+        // Navigate to room page
+        window.location.href = '/room/' + this.roomCode;
+      }
     });
 
     s.on('room-error', data => {
@@ -55,17 +77,24 @@ const Lobby = {
     });
 
     s.on('lobby-update', data => {
-      this._renderWaitingRoom(data.roomState, false);
+      if (this._isRoomPage) {
+        this._renderWaitingRoom(data.roomState, false);
+      }
     });
 
     s.on('game-started', data => {
-      UI.initOnline(this.socket, this.roomCode, this.mySeatIndex, data.gameState);
+      sessionStorage.setItem('cardgame-online-start', JSON.stringify({
+        roomCode: this.roomCode,
+        seatIndex: this.mySeatIndex,
+        gameState: data.gameState
+      }));
+      window.location.href = '/game';
     });
 
     s.on('room-closed', data => {
       this._clearSession();
       alert(data.reason || 'The room was closed.');
-      UI._showScreen('mode-screen');
+      window.location.href = '/lobby';
     });
 
     s.on('connect_error', () => {
@@ -104,11 +133,8 @@ const Lobby = {
 
   // ── Waiting room rendering ─────────────────────────────────────────────
   _renderWaitingRoom(roomState, isHost) {
-    UI._showScreen('lobby-screen');
-    document.getElementById('lobby-form').style.display = 'none';
-    document.getElementById('waiting-room').style.display = 'block';
-
     document.getElementById('room-code-display').textContent = roomState.code;
+    document.title = 'Card Game — Room ' + roomState.code;
 
     const list = document.getElementById('seat-list');
     list.innerHTML = '';
@@ -121,12 +147,10 @@ const Lobby = {
       list.appendChild(li);
     });
 
-    // Show start button only for host
     const startBtn = document.getElementById('lobby-start-btn');
     const isHostNow = roomState.seats[roomState.hostSeatIndex]?.index === this.mySeatIndex;
     startBtn.style.display = (isHost || isHostNow) ? 'block' : 'none';
 
-    // Check if all seats filled
     const allFilled = roomState.seats.every(s => s.isAI || s.filled);
     startBtn.disabled = !allFilled;
     startBtn.textContent = allFilled ? 'Start Game' : `Waiting for players… (${roomState.seats.filter(s => s.isAI || s.filled).length}/${roomState.seats.length})`;
@@ -163,3 +187,10 @@ const Lobby = {
     if (el) el.textContent = msg;
   },
 };
+
+// Auto-init on lobby or room pages
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('lobby-screen')) {
+    Lobby.init();
+  }
+});

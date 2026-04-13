@@ -13,6 +13,7 @@ class Game {
   }
 
   deal() {
+    AI.resetMemory();
     const deck = Card.buildDeck();
     const n = this.players.length;
 
@@ -94,6 +95,11 @@ class Game {
     const didCut = this.phase !== 'opening' &&
                    this.currentTrick.plays.length > 1 &&
                    card.suit !== this.currentTrick.leadSuit;
+
+    // Record cut for AI memory
+    if (card.suit !== this.currentTrick.leadSuit && this.currentTrick.leadSuit) {
+      AI.recordCut(player.id, this.currentTrick.leadSuit);
+    }
 
     // Check if all trick participants have played, or someone just cut
     const participants = this.currentTrick.participantIds;

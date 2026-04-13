@@ -83,6 +83,11 @@ function reconnectRoom(socketId, code, sessionToken) {
   // Remove old socket mapping
   if (seat.socketId) room.playerSocketMap.delete(seat.socketId);
 
+  // Update hostSocketId if this seat was the host
+  if (seat.socketId === room.hostSocketId) {
+    room.hostSocketId = socketId;
+  }
+
   seat.socketId = socketId;
   seat.connected = true;
   room.playerSocketMap.set(socketId, seatIndex);

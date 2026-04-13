@@ -24,11 +24,13 @@ module.exports = function createAiScheduler({ AI, broadcast }) {
       if (!validCards.length) return;
 
       const isLeading = game.currentTrick.plays.length === 0;
+      const activeCount = game.players.filter(p => !p.isOut).length;
       const chosen = AI.chooseCard(
         { hand: validCards, hasSuit: s => validCards.some(c => c.suit === s), id: player.id },
         game.currentTrick.plays,
         game.currentTrick.leadSuit,
-        isLeading
+        isLeading,
+        activeCount
       );
       const result = game.playCard(player, chosen);
       if (result !== null) {

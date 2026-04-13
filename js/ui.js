@@ -12,55 +12,66 @@ const UI = {
 
   // ── INIT ───────────────────────────────────────────────
   init() {
-    document.getElementById('start-btn').addEventListener('click', () => this.startGame());
     document.getElementById('play-again-btn').addEventListener('click', () => this._onPlayAgain());
     document.getElementById('cover-ready-btn').addEventListener('click', () => this._onCoverReady());
-    document.getElementById('mode-online-btn').addEventListener('click', () => {
-      this._showScreen('lobby-screen');
-      Lobby.init();
-    });
-    document.getElementById('mode-local-btn').addEventListener('click', () => this.showSetupScreen());
-    this._showScreen('mode-screen');
-  },
 
-  showSetupScreen() {
-    this._showScreen('setup-screen');
-    this._renderSetup(4);
-  },
-
-  _renderSetup(count) {
-    document.querySelectorAll('#setup-screen .count-btn').forEach(btn => {
-      btn.classList.toggle('active', parseInt(btn.dataset.count) === count);
-    });
-    const container = document.getElementById('player-rows');
-    container.innerHTML = '';
-    for (let i = 0; i < count; i++) {
-      const defaultType = i === 0 ? 'human' : 'ai';
-      const defaultName = defaultType === 'human' ? `Player ${i + 1}` : `Bot ${i + 1}`;
-      const row = document.createElement('div');
-      row.className = 'player-row';
-      row.innerHTML = `
-        <label>Seat ${i + 1}</label>
-        <select data-seat="${i}">
-          <option value="human" ${defaultType === 'human' ? 'selected' : ''}>Human</option>
-          <option value="ai" ${defaultType === 'ai' ? 'selected' : ''}>AI</option>
-        </select>
-        <input type="text" data-name="${i}" value="${defaultName}" maxlength="16">
-      `;
-      container.appendChild(row);
+    // Check if we have local game config from the setup page
+    const localConfig = sessionStorage.getItem('cardgame-local-config');
+    if (localConfig) {
+      sessionStorage.removeItem('cardgame-local-config');
+      this._startLocalGame(JSON.parse(localConfig));
+      return;
     }
+
+    // Check if we were sent here from the lobby with a fresh game start
+    const onlineStart = sessionStorage.getItem('cardgame-online-start');
+    if (onlineStart) {
+      sessionStorage.removeItem('cardgame-online-start');
+      try {
+        const { roomCode, seatIndex, gameState } = JSON.parse(onlineStart);
+        this.mode = 'online';
+        this.roomCode = roomCode;
+        this.onlineSeatIndex = seatIndex;
+        const socket = io();
+        this._registerOnlineEvents(socket);
+        // Reconnect the socket to the room using the saved session token
+        const session = localStorage.getItem('cardgame-session');
+        if (session) {
+          const { token } = JSON.parse(session);
+          socket.emit('reconnect-room', { code: roomCode, sessionToken: token });
+        }
+        this._showScreen('game-screen');
+        this.applyServerState(gameState);
+        return;
+      } catch (_) {}
+    }
+
+    // Check if we have an online session to reconnect to (e.g. page refresh)
+    const session = localStorage.getItem('cardgame-session');
+    if (session) {
+      try {
+        const { code, seatIndex, token } = JSON.parse(session);
+        if (code && token) {
+          this.mode = 'online';
+          this.roomCode = code;
+          this.onlineSeatIndex = seatIndex;
+          const socket = io();
+          this._registerOnlineEvents(socket);
+          socket.emit('reconnect-room', { code, sessionToken: token });
+          this._showScreen('game-screen');
+          this._setStatus('Reconnecting…');
+          return;
+        }
+      } catch (_) {}
+    }
+
+    // No config found — redirect back to home
+    window.location.href = '/';
   },
 
   // ── LOCAL GAME ─────────────────────────────────────────
-  startGame() {
+  _startLocalGame(configs) {
     this.mode = 'local';
-    const count = parseInt(document.querySelector('#setup-screen .count-btn.active').dataset.count);
-    const configs = [];
-    for (let i = 0; i < count; i++) {
-      const isAI = document.querySelector(`select[data-seat="${i}"]`).value === 'ai';
-      const name = document.querySelector(`input[data-name="${i}"]`).value.trim() || `Player ${i + 1}`;
-      configs.push({ name, isAI });
-    }
     const humanIndices = configs.map((c, i) => c.isAI ? -1 : i).filter(i => i >= 0);
     this.humanPlayerIndex = humanIndices.length === 1 ? humanIndices[0] : -1;
     this.game = new Game(configs);
@@ -85,9 +96,10 @@ const UI = {
         const leadSuit = game.currentTrick.leadSuit;
         const isLeading = trickSoFar.length === 0;
         const validCards = game.getValidCards(player);
+        const activeCount = game.players.filter(p => !p.isOut).length;
         const chosen = AI.chooseCard(
           { hand: validCards, hasSuit: (s) => validCards.some(c => c.suit === s), id: player.id },
-          trickSoFar, leadSuit, isLeading
+          trickSoFar, leadSuit, isLeading, activeCount
         );
         const result = game.playCard(player, chosen);
         this.renderAll();
@@ -153,6 +165,20 @@ const UI = {
     this.roomCode = roomCode;
     this.onlineSeatIndex = mySeatIndex;
 
+    // Save session info so game page can reconnect
+    sessionStorage.setItem('cardgame-online', JSON.stringify({
+      roomCode, seatIndex: mySeatIndex
+    }));
+
+    this._registerOnlineEvents(socket);
+
+    this._showScreen('game-screen');
+    this.applyServerState(gameState);
+  },
+
+  _registerOnlineEvents(socket) {
+    this.socket = socket;
+
     socket.on('game-state', data => {
       this.onlineState = data.gameState;
       this.applyServerState(data.gameState);
@@ -160,7 +186,6 @@ const UI = {
 
     socket.on('trick-result', data => {
       this._showTrickResultMsg(data.result);
-      // Delay re-render so player can read the message
       setTimeout(() => {
         this.onlineState = data.gameState;
         this.applyServerState(data.gameState);
@@ -190,11 +215,22 @@ const UI = {
 
     socket.on('room-closed', data => {
       alert(data.reason || 'The room was closed.');
-      UI._showScreen('mode-screen');
+      window.location.href = '/';
     });
 
-    this._showScreen('game-screen');
-    this.applyServerState(gameState);
+    socket.on('room-error', data => {
+      alert(data.message || 'Room error.');
+      window.location.href = '/';
+    });
+
+    socket.on('room-joined', data => {
+      window.location.href = '/room/' + (data.code || this.roomCode);
+    });
+
+    socket.on('game-started', data => {
+      this._showScreen('game-screen');
+      this.applyServerState(data.gameState);
+    });
   },
 
   applyServerState(gs) {
@@ -530,7 +566,6 @@ const UI = {
 
   // ── END SCREEN ────────────────────────────────────────
   showEndScreen(winners, loser) {
-    // Online mode: winners/loser passed as args; local: read from game
     const w = winners || (this.game ? this.game.winners.map((p, i) => ({ name: p.name, finishPosition: i + 1 })) : []);
     const l = loser || (this.game?.loser ? { name: this.game.loser.name, handCount: this.game.loser.hand.length } : null);
 
@@ -556,14 +591,15 @@ const UI = {
     if (this.mode === 'online') {
       this.socket.emit('play-again', { code: this.roomCode });
     } else {
-      this.showSetupScreen();
+      window.location.href = '/setup';
     }
   },
 
   // ── HELPERS ───────────────────────────────────────────
   _showScreen(id) {
-    ['mode-screen', 'lobby-screen', 'setup-screen', 'cover-screen', 'game-screen', 'end-screen'].forEach(s => {
-      document.getElementById(s).classList.toggle('active', s === id);
+    ['cover-screen', 'game-screen', 'end-screen'].forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.classList.toggle('active', s === id);
     });
   },
 };

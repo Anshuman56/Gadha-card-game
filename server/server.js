@@ -38,6 +38,13 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
+// View routes (before static middleware so index.html doesn't shadow /)
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../views/home.html')));
+app.get('/lobby', (req, res) => res.sendFile(path.join(__dirname, '../views/lobby.html')));
+app.get('/room/:code', (req, res) => res.sendFile(path.join(__dirname, '../views/room.html')));
+app.get('/setup', (req, res) => res.sendFile(path.join(__dirname, '../views/setup.html')));
+app.get('/game', (req, res) => res.sendFile(path.join(__dirname, '../views/game.html')));
+
 app.use(express.static(path.join(__dirname, '..')));
 
 const broadcast = createBroadcast(io, rm);

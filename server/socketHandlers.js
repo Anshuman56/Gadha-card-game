@@ -185,16 +185,19 @@ module.exports = function registerSocketHandlers({ io, rm, Game, broadcast, aiSc
       seat.connected = false;
 
       if (room.phase === 'lobby') {
-        if (socket.id === room.hostSocketId) {
-          broadcastToRoom(room, 'room-closed', { reason: 'Host left the lobby.' });
-          clearAiTimers(room);
-          rm.deleteRoom(room.code);
-        } else {
-          seat.socketId = null;
-          seat.connected = false;
-          room.playerSocketMap.delete(socket.id);
-          broadcastToRoom(room, 'lobby-update', { roomState: rm.buildRoomState(room, null) });
-        }
+        // Grace period: player may be navigating between pages
+        room.disconnectTimers[seatIndex] = setTimeout(() => {
+          if (room.config.seats[seatIndex].connected) return;
+          if (socket.id === room.hostSocketId) {
+            broadcastToRoom(room, 'room-closed', { reason: 'Host left the lobby.' });
+            clearAiTimers(room);
+            rm.deleteRoom(room.code);
+          } else {
+            seat.socketId = null;
+            room.playerSocketMap.delete(socket.id);
+            broadcastToRoom(room, 'lobby-update', { roomState: rm.buildRoomState(room, null) });
+          }
+        }, 5000);
         return;
       }
 

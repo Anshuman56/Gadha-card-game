@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Game</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- ── COVER SCREEN ───────────────────────────────── -->
+  <div id="cover-screen">
+    <h2>Pass the device</h2>
+    <p>Tap when ready to see your cards.</p>
+    <button id="cover-ready-btn">I'm ready — show my cards</button>
+  </div>
+
+  <!-- ── GAME SCREEN ────────────────────────────────── -->
+  <div id="game-screen">
+    <button id="menu-btn" aria-label="Show players" onclick="document.body.classList.toggle('menu-open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div id="menu-backdrop" onclick="document.body.classList.remove('menu-open')"></div>
+
+    <div id="status-bar">
+      <span class="status-text">Starting…</span>
+    </div>
+
+    <div id="trick-area"></div>
+
+    <div id="scoreboard">
+      <h3>Players</h3>
+    </div>
+
+    <div id="history-area">
+      <h3>Last Trick</h3>
+      <div id="history-list"></div>
+    </div>
+
+    <div id="hand-area">
+      <h3>Your hand</h3>
+      <div id="cards-container"></div>
+    </div>
+  </div>
+
+  <!-- ── END SCREEN ─────────────────────────────────── -->
+  <div id="end-screen">
+    <h2>Game Over!</h2>
+
+    <div class="end-section">
+      <h3>Winners (finished first)</h3>
+      <ul class="winner-list" id="winner-list"></ul>
+    </div>
+
+    <div class="end-section">
+      <h3>Loser (last one holding cards)</h3>
+      <div class="loser-name" id="loser-name"></div>
+    </div>
+
+    <button id="play-again-btn">Play Again</button>
+  </div>
+
+  <!-- Scripts in dependency order -->
+  <script src="/js/card.js"></script>
+  <script src="/js/player.js"></script>
+  <script src="/js/ai.js"></script>
+  <script src="/js/game.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/lobby.js"></script>
+  <script src="/js/ui.js"></script>
+</body>
+</html>

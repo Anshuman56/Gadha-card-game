@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Game — Setup</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div id="setup-screen" class="active">
+    <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+    <h1>Card Game</h1>
+    <p class="subtitle">Race to empty your hand — but don't win a trick!</p>
+
+    <p class="section-label">Number of players</p>
+    <div class="count-buttons">
+      <button class="count-btn" data-count="2" onclick="Setup.renderRows(2)">2</button>
+      <button class="count-btn" data-count="3" onclick="Setup.renderRows(3)">3</button>
+      <button class="count-btn active" data-count="4" onclick="Setup.renderRows(4)">4</button>
+      <button class="count-btn" data-count="5" onclick="Setup.renderRows(5)">5</button>
+      <button class="count-btn" data-count="6" onclick="Setup.renderRows(6)">6</button>
+    </div>
+
+    <p class="section-label">Players</p>
+    <div id="player-rows"></div>
+
+    <button id="start-btn">Start Game</button>
+  </div>
+
+  <script>
+    const Setup = {
+      renderRows(count) {
+        document.querySelectorAll('#setup-screen .count-btn').forEach(btn => {
+          btn.classList.toggle('active', parseInt(btn.dataset.count) === count);
+        });
+        const container = document.getElementById('player-rows');
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+          const defaultType = i === 0 ? 'human' : 'ai';
+          const defaultName = defaultType === 'human' ? `Player ${i + 1}` : `Bot ${i + 1}`;
+          const row = document.createElement('div');
+          row.className = 'player-row';
+          row.innerHTML = `
+            <label>Seat ${i + 1}</label>
+            <select data-seat="${i}">
+              <option value="human" ${defaultType === 'human' ? 'selected' : ''}>Human</option>
+              <option value="ai" ${defaultType === 'ai' ? 'selected' : ''}>AI</option>
+            </select>
+            <input type="text" data-name="${i}" value="${defaultName}" maxlength="16">
+          `;
+          container.appendChild(row);
+        }
+      },
+
+      startGame() {
+        const count = parseInt(document.querySelector('#setup-screen .count-btn.active').dataset.count);
+        const configs = [];
+        for (let i = 0; i < count; i++) {
+          const isAI = document.querySelector(`select[data-seat="${i}"]`).value === 'ai';
+          const name = document.querySelector(`input[data-name="${i}"]`).value.trim() || `Player ${i + 1}`;
+          configs.push({ name, isAI });
+        }
+        sessionStorage.setItem('cardgame-local-config', JSON.stringify(configs));
+        window.location.href = '/game';
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      Setup.renderRows(4);
+      document.getElementById('start-btn').addEventListener('click', () => Setup.startGame());
+    });
+  </script>
+</body>
+</html>
