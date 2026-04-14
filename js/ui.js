@@ -12,7 +12,6 @@ const UI = {
 
   // ── INIT ───────────────────────────────────────────────
   init() {
-    document.getElementById('play-again-btn').addEventListener('click', () => this._onPlayAgain());
     document.getElementById('cover-ready-btn').addEventListener('click', () => this._onCoverReady());
 
     // Check if we have local game config from the setup page
@@ -610,35 +609,20 @@ const UI = {
     const w = winners || (this.game ? this.game.winners.map((p, i) => ({ name: p.name, finishPosition: i + 1 })) : []);
     const l = loser || (this.game?.loser ? { name: this.game.loser.name, handCount: this.game.loser.hand.length } : null);
 
-    const winnerList = document.getElementById('winner-list');
-    winnerList.innerHTML = '';
-    if (w.length === 0) {
-      winnerList.innerHTML = '<li>No winners this round.</li>';
-    } else {
-      w.forEach(p => {
-        const li = document.createElement('li');
-        li.textContent = `#${p.finishPosition} ${p.name}`;
-        winnerList.appendChild(li);
-      });
-    }
+    sessionStorage.setItem('cardgame-end', JSON.stringify({
+      winners: w,
+      loser: l,
+      mode: this.mode,
+      roomCode: this.roomCode,
+    }));
 
-    const loserEl = document.getElementById('loser-name');
-    loserEl.textContent = l ? `${l.name} (${l.handCount} cards left)` : '—';
-
-    this._showScreen('end-screen');
-  },
-
-  _onPlayAgain() {
-    if (this.mode === 'online') {
-      this.socket.emit('play-again', { code: this.roomCode });
-    } else {
-      window.location.href = '/setup';
-    }
+    if (this.socket) this.socket.disconnect();
+    window.location.href = '/game-over';
   },
 
   // ── HELPERS ───────────────────────────────────────────
   _showScreen(id) {
-    ['cover-screen', 'game-screen', 'end-screen'].forEach(s => {
+    ['cover-screen', 'game-screen'].forEach(s => {
       const el = document.getElementById(s);
       if (el) el.classList.toggle('active', s === id);
     });

@@ -44,6 +44,8 @@ app.get('/lobby', (req, res) => res.sendFile(path.join(__dirname, '../views/lobb
 app.get('/room/:code', (req, res) => res.sendFile(path.join(__dirname, '../views/room.html')));
 app.get('/setup', (req, res) => res.sendFile(path.join(__dirname, '../views/setup.html')));
 app.get('/game', (req, res) => res.sendFile(path.join(__dirname, '../views/game.html')));
+app.get('/game-over', (req, res) => res.sendFile(path.join(__dirname, '../views/game-over.html')));
+app.get('/how-to-play', (req, res) => res.sendFile(path.join(__dirname, '../views/how-to-play.html')));
 
 app.use(express.static(path.join(__dirname, '..')));
 

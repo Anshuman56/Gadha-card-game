@@ -708,3 +708,51 @@ body {
     pointer-events: auto;
   }
 }
+
+/* ── HOW TO PLAY ──────────────────────────────────── */
+#how-to-play-screen {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+#how-to-play-screen h1 {
+  font-size: 2rem;
+  margin-bottom: 6px;
+  text-align: center;
+}
+#how-to-play-screen .subtitle {
+  text-align: center;
+  opacity: 0.65;
+  margin-bottom: 32px;
+}
+.guide-section {
+  background: rgba(0,0,0,0.25);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 14px;
+}
+.guide-section h2 {
+  font-size: 1.05rem;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.guide-section p,
+.guide-section li {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  opacity: 0.9;
+}
+.guide-section ul {
+  padding-left: 20px;
+}
+.guide-section li {
+  margin-bottom: 6px;
+}
+.guide-section strong { color: #fff; }
+.guide-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+}
+

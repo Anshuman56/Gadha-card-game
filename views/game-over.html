@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Over — Card Game</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div id="end-screen" class="active">
+    <h2>Game Over!</h2>
+
+    <div class="end-section">
+      <h3>Winners (finished first)</h3>
+      <ul class="winner-list" id="winner-list"></ul>
+    </div>
+
+    <div class="end-section">
+      <h3>Loser (last one holding cards)</h3>
+      <div class="loser-name" id="loser-name"></div>
+    </div>
+
+    <button id="play-again-btn">Play Again</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/gameOver.js"></script>
+</body>
+</html>

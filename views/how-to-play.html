@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Play — Card Game</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div id="how-to-play-screen">
+    <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+    <h1>How to Play</h1>
+    <p class="subtitle">Race to empty your hand — but don't win a trick!</p>
+
+    <section class="guide-section">
+      <h2>Goal</h2>
+      <p>Get rid of all your cards without winning tricks. Winning a trick is <strong>bad</strong> — you take every played card into your hand. The last player still holding cards loses.</p>
+    </section>
+
+    <section class="guide-section">
+      <h2>Setup</h2>
+      <ul>
+        <li>Standard 52-card deck, dealt evenly among players (2–8).</li>
+        <li>The player with the <strong>Ace of Spades</strong> leads first and must play it.</li>
+      </ul>
+    </section>
+
+    <section class="guide-section">
+      <h2>Opening Trick</h2>
+      <ul>
+        <li>Every player must follow spades if they have any.</li>
+        <li>If everyone follows → all played cards are <strong>discarded</strong>.</li>
+        <li>If anyone cuts (plays a non-spade), the trick ends immediately and the Ace of Spades holder <strong>takes all cards played so far</strong>.</li>
+      </ul>
+    </section>
+
+    <section class="guide-section">
+      <h2>Normal Tricks</h2>
+      <ul>
+        <li>Follow the led suit if possible; otherwise cut (play any card).</li>
+        <li>As soon as any player cuts, the trick ends — remaining players skip.</li>
+        <li>If all followed → all cards discarded.</li>
+        <li>If someone cut → highest card of the led suit <strong>wins</strong> and takes every played card into hand.</li>
+      </ul>
+    </section>
+
+    <section class="guide-section">
+      <h2>Who Leads Next</h2>
+      <p>The player who played the highest card of the led suit leads the next trick — even when the trick was discarded.</p>
+    </section>
+
+    <section class="guide-section">
+      <h2>Winning &amp; Losing</h2>
+      <ul>
+        <li>Play your last card without winning the trick → you're <strong>out</strong> (a winner), ranked by finish order.</li>
+        <li>Last player holding cards is the <strong>loser</strong>.</li>
+      </ul>
+    </section>
+
+    <section class="guide-section">
+      <h2>Strategy Tips</h2>
+      <ul>
+        <li>When leading, burn high cards — they're most likely to win tricks later.</li>
+        <li>When following, play your highest card <em>below</em> the current winner to dump it safely.</li>
+        <li>Keep low cards of each suit so you can follow safely late in the game.</li>
+      </ul>
+    </section>
+
+    <div class="guide-cta">
+      <button class="mode-btn primary" onclick="window.location.href='/lobby'">🌐 Play Online</button>
+      <button class="mode-btn" onclick="window.location.href='/setup'">🖥️ Play Locally</button>
+    </div>
+  </div>
+
+</body>
+</html>
