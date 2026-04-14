@@ -138,6 +138,10 @@ const UI = {
   _handleResult(result) {
     if (result === null) { this.beginTurn(); return; }
 
+    // Show the completed trick (all N cards) on the table during the pause,
+    // since _resolveTrick() has already cleared currentTrick for the next one.
+    this._renderCompletedTrick();
+
     let msg = '';
     if (result.type === 'discard') {
       msg = 'All players followed suit — cards discarded! Same player leads again.';
@@ -185,6 +189,10 @@ const UI = {
     });
 
     socket.on('trick-result', data => {
+      // Show the fully-resolved trick (all N cards) on the table during the
+      // pause. Server already started the next trick, so data.gameState
+      // .currentTrick.plays is empty — use trickHistory[0] instead.
+      this._renderOnlineCompletedTrick(data.gameState);
       this._showTrickResultMsg(data.result);
       setTimeout(() => {
         this.onlineState = data.gameState;
@@ -253,6 +261,22 @@ const UI = {
     } else {
       const active = gs.players[gs.activePlayerIndex];
       this._setStatus(active ? `${active.name} is playing…` : 'Waiting…');
+    }
+  },
+
+  _renderOnlineCompletedTrick(gs) {
+    if (!gs.trickHistory || gs.trickHistory.length === 0) return;
+    const area = document.getElementById('trick-area');
+    area.innerHTML = '';
+    for (const p of gs.trickHistory[0].plays) {
+      const wrap = document.createElement('div');
+      wrap.className = 'trick-play';
+      wrap.appendChild(this._cardEl(p.card, false));
+      const lbl = document.createElement('div');
+      lbl.className = 'player-label';
+      lbl.textContent = p.playerName;
+      wrap.appendChild(lbl);
+      area.appendChild(wrap);
     }
   },
 
@@ -396,6 +420,23 @@ const UI = {
     this._renderScoreboard();
     this._renderHand();
     this._renderHistory();
+  },
+
+  _renderCompletedTrick() {
+    const history = this.game?.trickHistory;
+    if (!history || history.length === 0) return;
+    const area = document.getElementById('trick-area');
+    area.innerHTML = '';
+    for (const { player, card } of history[history.length - 1].plays) {
+      const wrap = document.createElement('div');
+      wrap.className = 'trick-play';
+      wrap.appendChild(this._cardEl(card, false));
+      const lbl = document.createElement('div');
+      lbl.className = 'player-label';
+      lbl.textContent = player.name;
+      wrap.appendChild(lbl);
+      area.appendChild(wrap);
+    }
   },
 
   _renderTrick() {

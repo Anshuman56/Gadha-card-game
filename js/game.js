@@ -35,10 +35,20 @@ class Game {
   }
 
   _startTrick() {
+    // Order participants starting from the lead seat and wrapping around, so
+    // turn order within the trick is lead → lead+1 → … (skipping players
+    // who are out). Plain seat order would make e.g. seat 2's lead advance
+    // to seat 0 next instead of seat 3.
+    const n = this.players.length;
+    const participantIds = [];
+    for (let i = 0; i < n; i++) {
+      const p = this.players[(this.leadPlayerIndex + i) % n];
+      if (!p.isOut) participantIds.push(p.id);
+    }
     this.currentTrick = {
       plays: [],
       leadSuit: null,
-      participantIds: this._activePlayers().map(p => p.id),
+      participantIds,
     };
     this.activePlayerIndex = this.leadPlayerIndex;
   }
@@ -88,12 +98,7 @@ class Game {
 
     // If this player cut (played a different suit), end the trick immediately —
     // remaining players do not play regardless of what they hold.
-    // Exception: in the opening trick, everyone must get a chance to play,
-    // because the rule is "all follow spades" — we need every card on the table
-    // to determine the outcome (and to hand them to the Ace of Spades holder
-    // if anyone cut).
-    const didCut = this.phase !== 'opening' &&
-                   this.currentTrick.plays.length > 1 &&
+    const didCut = this.currentTrick.plays.length > 1 &&
                    card.suit !== this.currentTrick.leadSuit;
 
     // Record cut for AI memory

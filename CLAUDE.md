@@ -29,7 +29,7 @@ These four files are **loaded in both environments** — in the browser via `<sc
 
 ### Game rules (encoded in `js/game.js`)
 - **Start:** Player with Ace of Spades leads first and must play it.
-- **Opening trick:** All must follow spades. If all followed → discard; if anyone cut → Ace of Spades holder takes all cards.
+- **Opening trick:** All must follow spades. If all followed → discard; if anyone cut → trick ends immediately and the Ace of Spades holder takes all cards played so far.
 - **Normal tricks:** Follow led suit if possible; otherwise cut (play anything). As soon as any player cuts, the trick ends immediately — remaining players skip. If all followed → discard all; if someone cut → highest led-suit card wins and takes all played cards into hand.
 - **Winning:** Taking cards is BAD. Players who play their last card without winning a trick are OUT (winners). Last player holding cards loses.
 - **After each trick:** Player who played the highest card of the led suit leads next (even in the discard case).
