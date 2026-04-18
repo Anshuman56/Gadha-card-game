@@ -91,15 +91,8 @@ const UI = {
     if (player.isAI) {
       this._setStatus(`${player.name} is thinking…`);
       setTimeout(() => {
-        const trickSoFar = game.currentTrick.plays;
-        const leadSuit = game.currentTrick.leadSuit;
-        const isLeading = trickSoFar.length === 0;
-        const validCards = game.getValidCards(player);
-        const activeCount = game.players.filter(p => !p.isOut).length;
-        const chosen = AI.chooseCard(
-          { hand: validCards, hasSuit: (s) => validCards.some(c => c.suit === s), id: player.id },
-          trickSoFar, leadSuit, isLeading, activeCount
-        );
+        const ctx = AI.buildContext(game, player);
+        const chosen = AI.chooseCard(ctx);
         const result = game.playCard(player, chosen);
         this.renderAll();
         this._handleResult(result);

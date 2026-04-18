@@ -10,10 +10,11 @@ class Game {
     this.loser = null;
     this.trickCount = 0;
     this.trickHistory = []; // [{number, plays:[{player,card}], type, winner}]
+    this.cutHistory = {};   // { suit: Set<playerId> } — reset per deal; read by AI
   }
 
   deal() {
-    AI.resetMemory();
+    this.cutHistory = {};
     const deck = Card.buildDeck();
     const n = this.players.length;
 
@@ -101,9 +102,11 @@ class Game {
     const didCut = this.currentTrick.plays.length > 1 &&
                    card.suit !== this.currentTrick.leadSuit;
 
-    // Record cut for AI memory
+    // Record cut for AI memory (per-deal state lives on the game, not AI).
     if (card.suit !== this.currentTrick.leadSuit && this.currentTrick.leadSuit) {
-      AI.recordCut(player.id, this.currentTrick.leadSuit);
+      const suit = this.currentTrick.leadSuit;
+      if (!this.cutHistory[suit]) this.cutHistory[suit] = new Set();
+      this.cutHistory[suit].add(player.id);
     }
 
     // Check if all trick participants have played, or someone just cut

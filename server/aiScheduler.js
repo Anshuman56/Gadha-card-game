@@ -20,18 +20,9 @@ module.exports = function createAiScheduler({ AI, broadcast }) {
       if (!room.game || room.game.phase === 'finished') return;
       if (room.game.activePlayerIndex !== player.id) return;
 
-      const validCards = game.getValidCards(player);
-      if (!validCards.length) return;
-
-      const isLeading = game.currentTrick.plays.length === 0;
-      const activeCount = game.players.filter(p => !p.isOut).length;
-      const chosen = AI.chooseCard(
-        { hand: validCards, hasSuit: s => validCards.some(c => c.suit === s), id: player.id },
-        game.currentTrick.plays,
-        game.currentTrick.leadSuit,
-        isLeading,
-        activeCount
-      );
+      const ctx = AI.buildContext(game, player);
+      if (!ctx.player.hand.length) return;
+      const chosen = AI.chooseCard(ctx);
       const result = game.playCard(player, chosen);
       if (result !== null) {
         broadcast.broadcastTrickResult(room, result);
